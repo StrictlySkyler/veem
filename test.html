@@ -1,0 +1,274 @@
+<doctype html>
+<html>
+  <head>
+    <title>Coding Challenge: Skyler Brungardt</title>
+
+    <style>
+      * {
+        transition: background 1s;
+      }
+
+      h1 {
+        font-family: "Impact", sans-serif;
+        text-shadow: 1px 1px 0 #fff, 2px 2px 0 #fff, 3px 3px 0 #fff;
+      }
+
+      h2, li {
+        text-shadow: 1px 1px 0 #acacac;
+      }
+
+      pre {
+        display: inline-block;
+      }
+
+      span {
+        font-size: 32px;
+        line-height: 10px;
+        vertical-align: middle;
+      }
+
+      span.pass {
+        color: lime;
+      }
+
+      span.fail {
+        color: red;
+      }
+    </style>
+
+  </head>
+  <body>
+
+    <h1>ZOMG!!!1!one ALL THE COLOR THINGS</h1>
+    <h2>Tests:</h2>
+    <ul>
+      <li><pre>GET_RANDOM_COLOR_CODE</pre> should return a color code: <span id=result-1>&bull;</span>
+      <li><pre>GET_RANDOM_COLOR_CODE</pre> should return different codes each time when called multiple times: <span id=result-2>&bull;</span>
+      <li><pre>GET_RANDOM_COLOR_STRING</pre> should return a color string: <span id=result-3>&bull;</span>
+      <li><pre>GET_RANDOM_COLOR_STRING</pre> should return different strings each time when called multiple times: <span id=result-4>&bull;</span>
+      <li><pre>CHANGE_TARGET_BACKGROUND</pre> should change a target element's background style: <span id=result-5>&bull;</span>
+      <li><pre>TRACK_COLOR_USED</pre> should track a color which has been used: <span id=result-6>&bull;</span>
+      <li><pre>CHECK_COLOR_AVAILABLE</pre> should report a color is available if it hasn't been tracked: <span id=result-7>&bull;</span>
+      <li><pre>CHECK_COLOR_AVAILABLE</pre> should report a color is not available if it has been tracked: <span id=result-8>&bull;</span>
+      <li><pre>GET_AVAILABLE_COLOR</pre> should provide a color which hasn't been used: <span id=result-9>&bull;</span>
+      <li><pre>CHANGE_COLOR</pre> should set a timer for when the a color is to be set: <span id=result-10>&bull;</span>
+    </ul>
+
+    <script>
+      (function init () {
+        const GET_RANDOM_COLOR_CODE = () => {
+          const CAP = 255;
+          return Math.round(Math.random() * CAP);
+        }
+        const GET_RANDOM_COLOR_STRING = () => {
+          const START = 'rgb(';
+          const END = ');';
+
+          let red = GET_RANDOM_COLOR_CODE();
+          let blue = GET_RANDOM_COLOR_CODE();
+          let green = GET_RANDOM_COLOR_CODE();
+
+          return `${START}${red}, ${blue}, ${green}${END}`;
+        }
+        const CHANGE_TARGET_BACKGROUND = (t, color_string) => {
+          return t.setAttribute('style', `background: ${color_string}`);
+        };
+        const TRACK_COLOR_USED = (color_string) => {
+          colors_used[color_string] = true;
+          return colors_used;
+        };
+        const CHECK_COLOR_AVAILABLE = (color_string) => {
+          return ! colors_used[color_string];
+        };
+        const GET_AVAILABLE_COLOR = () => {
+          let color = GET_RANDOM_COLOR_STRING();
+
+          if (CHECK_COLOR_AVAILABLE(color)) {
+            TRACK_COLOR_USED(color);
+            return color;
+          }
+
+          return GET_AVAILABLE_COLOR();
+        };
+        const CHANGE_COLOR = () => {
+          color_change_timer = setTimeout(() => {
+            let color = GET_AVAILABLE_COLOR();
+
+            console.log(`Changing color to ${color}`);
+            CHANGE_TARGET_BACKGROUND(TARGET, color);
+            total_time += CHANGE_INTERVAL;
+
+            return total_time < TIMEOUT && CHANGE_COLOR();
+
+          }, CHANGE_INTERVAL);
+
+          return color_change_timer;
+        };
+
+        const CHANGE_INTERVAL = 1000;
+        const TIMEOUT = 10000;
+        const TARGET = document.body;
+
+        let total_time = 0;
+        let color_change_timer;
+        let colors_used = {};
+
+        CHANGE_COLOR();
+
+        // Tests
+        const PASS_STRING = 'pass';
+        const FAIL_STRING = 'fail';
+
+        const TEST_1 = (() => {
+          const BOTTOM = 0;
+          const TOP = 255;
+          const RESULT = GET_RANDOM_COLOR_CODE();
+          const RESULT_REPORT = document.getElementById('result-1');
+
+          if (
+            typeof RESULT == 'number' &&
+            RESULT >= BOTTOM &&
+            RESULT <= TOP
+          ) {
+            return RESULT_REPORT.classList.add(PASS_STRING);
+          }
+
+          return RESULT_REPORT.classList.add(FAIL_STRING);
+        })();
+
+        const TEST_2 = (() => {
+          const RESULT1 = GET_RANDOM_COLOR_CODE();
+          const RESULT2 = GET_RANDOM_COLOR_CODE();
+          const RESULT3 = GET_RANDOM_COLOR_CODE();
+          const RESULT_REPORT = document.getElementById('result-2');
+
+          if (
+            RESULT1 != RESULT2 &&
+            RESULT2 != RESULT3 &&
+            RESULT1 != RESULT3
+          ) {
+            return RESULT_REPORT.classList.add(PASS_STRING);
+          }
+
+          return RESULT_REPORT.classList.add(FAIL_STRING);
+        })();
+
+        const TEST_3 = (() => {
+          const RESULT = GET_RANDOM_COLOR_STRING();
+          const RESULT_REPORT = document.getElementById('result-3');
+          const COLOR_STRING_REGEXP = /^rgb\(\d\d?\d?,\s\d\d?\d?,\s\d\d?\d?\);$/
+
+          if (
+              typeof RESULT == 'string' &&
+              COLOR_STRING_REGEXP.test(RESULT)
+             ) {
+            return RESULT_REPORT.classList.add(PASS_STRING);
+          }
+
+          return RESULT_REPORT.classList.add(FAIL_STRING);
+        })();
+
+        const TEST_4 = (() => {
+          const RESULT1 = GET_RANDOM_COLOR_STRING();
+          const RESULT2 = GET_RANDOM_COLOR_STRING();
+          const RESULT3 = GET_RANDOM_COLOR_STRING();
+          const RESULT_REPORT = document.getElementById('result-4');
+
+          if (
+            RESULT1 != RESULT2 &&
+            RESULT2 != RESULT3 &&
+            RESULT1 != RESULT3
+          ) {
+            return RESULT_REPORT.classList.add(PASS_STRING);
+          }
+
+          return RESULT_REPORT.classList.add(FAIL_STRING);
+        })();
+
+        const TEST_5 = (() => {
+          const TARGET = document.body;
+          const INITIAL_STYLE = TARGET.style.background;
+          const COLOR = 'rgb(0, 0, 0)';
+          const RESULT_REPORT = document.getElementById('result-5');
+
+          CHANGE_TARGET_BACKGROUND(TARGET, COLOR);
+
+          const NEW_STYLE = TARGET.style.background;
+
+          CHANGE_TARGET_BACKGROUND(TARGET, INITIAL_STYLE);
+
+          if (INITIAL_STYLE != NEW_STYLE) {
+            return RESULT_REPORT.classList.add(PASS_STRING);
+          }
+
+          return RESULT_REPORT.classList.add(FAIL_STRING);
+        })();
+
+        const TEST_6 = (() => {
+          const RESULT_REPORT = document.getElementById('result-6');
+          const SOME_COLOR = 'some color string';
+          const RESULTS = TRACK_COLOR_USED(SOME_COLOR);
+
+          colors_used = {};
+
+          if (RESULTS[SOME_COLOR] == true) {
+            return RESULT_REPORT.classList.add(PASS_STRING);
+          }
+
+          return RESULT_REPORT.classList.add(FAIL_STRING);
+        })();
+
+        const TEST_7 = (() => {
+          const RESULT_REPORT = document.getElementById('result-7');
+          const SOME_COLOR = 'some color string';
+          const AVAILABLE = CHECK_COLOR_AVAILABLE(SOME_COLOR);
+
+          if (AVAILABLE) return RESULT_REPORT.classList.add(PASS_STRING);
+
+          return RESULT_REPORT.classList.add(FAIL_STRING);
+        })();
+
+        const TEST_8 = (() => {
+          const RESULT_REPORT = document.getElementById('result-8');
+          const SOME_COLOR = 'some color string';
+
+          TRACK_COLOR_USED(SOME_COLOR);
+
+          const AVAILABLE = CHECK_COLOR_AVAILABLE(SOME_COLOR);
+
+          colors_used = {};
+
+          if (! AVAILABLE) return RESULT_REPORT.classList.add(PASS_STRING);
+
+          return RESULT_REPORT.classList.add(FAIL_STRING);
+        })();
+
+        const TEST_9 = (() => {
+          const RESULT_REPORT = document.getElementById('result-9');
+          const COLOR1 = GET_AVAILABLE_COLOR();
+          const COLOR2 = GET_AVAILABLE_COLOR();
+          const COLOR3 = GET_AVAILABLE_COLOR();
+
+          if (COLOR1 != COLOR2 != COLOR3) {
+            return RESULT_REPORT.classList.add(PASS_STRING);
+          }
+
+          return RESULT_REPORT.classList.add(FAIL_STRING);
+        })();
+
+        const TEST_10 = (() => {
+          const RESULT_REPORT = document.getElementById('result-10');
+          const RESULT_TIMER = CHANGE_COLOR();
+
+          clearTimeout(RESULT_TIMER);
+
+          if (typeof RESULT_TIMER == 'number') {
+            return RESULT_REPORT.classList.add(PASS_STRING);
+          }
+
+          return RESULT_REPORT.classList.add(FAIL_STRING);
+        })();
+      })();
+    </script>
+  </body>
+</html>
